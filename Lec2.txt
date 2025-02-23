@@ -1,0 +1,94 @@
+create type ename_ty AS object(
+fname varchar (20)
+lname varchar(20)
+midname varchar(20)
+)
+
+Create type emp_ty AS object(
+eno char(5)
+ename ename_ty,
+sal float
+)
+
+
+CREATE TABLE emp OF emp_ty(
+eno PRIMARY KEY 
+)
+
+Insert into emp Values(
+emp_ty(10,ename_ty('tharusha','lakshan','kasthuriarachchi'),10000.0)
+)
+
+
+select e.eno, e.ename.fname, e.ename.lname, e.sal
+from emp e
+
+
+-----------------------------------------------------------------------
+
+
+create type phone_arr AS VARRAY(5) OF
+NUMBER(12,2)
+
+create type ename_ty AS object(
+fname varchar (20)
+lname varchar(20)
+midname varchar(20)
+)
+
+
+CREATE TABLE emp (
+eno char() PRIMARY KEY
+ename ename_ty
+sal float
+ephone phone_arr 
+)
+
+Insert into emp  Values(
+emp_ty(10,ename_ty('','',''),10000.0,phone_arr(0764072282,0752166787))
+)
+
+
+select e.eno, e.ename.fname, e.ename.lname, e.sal, s.COLUMN_VALUE ephone
+from emp e, TABLE(e.ephone) s;
+
+
+-----------------------------------------------------------------------
+
+CREATE TYPE proj_t AS OBJECT (
+		projno NUMBER,
+	  	projname VARCHAR (15)); 
+
+CREATE TYPE proj_list AS TABLE OF proj_t;
+CREATE TYPE employee_t AS OBJECT (
+		eno number, 
+		projects proj_list);
+ 
+CREATE TABLE employees of employee_t (eno primary key)
+NESTED TABLE projects STORE AS employees_proj_table;
+
+
+INsert into employees Values (1000,
+employee_t(
+100,proj_list(
+	proj_t(1,'A')
+	proj_t(2,'B')
+	proj_t(3,'C')
+
+)
+)
+)
+
+SELECT * 
+	FROM TABLE(SELECT t.projects FROM employees t 
+	WHERE t.eno = 1000);
+
+
+-------------------------------------------------------------------------
+
+
+
+
+
+
+
