@@ -1,0 +1,143 @@
+-- Create EMPLOYEE table
+CREATE TABLE Employee (
+    EmpNo VARCHAR(20) PRIMARY KEY,
+    fname CHAR(20),
+    lname CHAR(20),
+    address VARCHAR(40),
+    salary INTEGER,
+    DeptNo VARCHAR(20),
+    FOREIGN KEY (DeptNo) REFERENCES Department(DeptNo)
+);
+
+-- Create DEPARTMENT table
+CREATE TABLE Department (
+    DeptNo VARCHAR(20) PRIMARY KEY,
+    DeptName CHAR(20),
+    Location VARCHAR(20)
+);
+
+
+
+
+-- Insert data into EMPLOYEE table
+INSERT INTO Employee (EmpNo, fname, lname, address, salary, DeptNo)
+VALUES 
+('Emp01', 'John', 'Scott', 'Mysore', 45000, '003'),
+('Emp02', 'James', 'Smith', 'Bangalore', 50000, '005'),
+('Emp03', 'Edward', 'Hedge', 'Bangalore', 65000, '002'),
+('Emp04', 'Santhosh', 'Kumar', 'Delhi', 80000, '002'),
+('Emp05', 'Veena', 'M', 'Mumbai', 45000, '004');
+
+-- Insert data into DEPARTMENT table
+INSERT INTO Department (DeptNo, DeptName, Location)
+VALUES 
+('001', 'Accounts', 'Bangalore'),
+('002', 'IT', 'Mumbai'),
+('003', 'ECE', 'Mumbai'),
+('004', 'ISE', 'Mumbai'),
+('005', 'CSE', 'Delhi');
+
+
+-- Create PROJECT table
+CREATE TABLE Project (
+    ProjNo CHAR(5) PRIMARY KEY,
+    Project_Name VARCHAR(20),
+    DeptNo VARCHAR(20),
+    FOREIGN KEY (DeptNo) REFERENCES Department(DeptNo)
+);
+
+-- Create WORKS_ON table
+CREATE TABLE Works_On (
+    EmpNo VARCHAR(20),
+    ProjNo CHAR(5),
+    DateWorked DATE,
+    Hours NUMERIC(2),
+    PRIMARY KEY (EmpNo, ProjNo, DateWorked),
+    FOREIGN KEY (EmpNo) REFERENCES Employee(EmpNo),
+    FOREIGN KEY (ProjNo) REFERENCES Project(ProjNo)
+);
+
+
+-- Insert data into PROJECT table
+INSERT INTO Project (ProjNo, Project_Name, DeptNo)
+VALUES 
+('P01', 'IOT', '005'),
+('P02', 'Cloud', '005'),
+('P03', 'BankMgmt', '004'),
+('P04', 'Sensors', '003'),
+('P05', 'BigData', '002');
+
+-- Insert data into WORKS_ON table
+INSERT INTO Works_On (EmpNo, ProjNo, DateWorked, Hours)
+VALUES 
+('Emp02', 'P03', CONVERT(DATE, '2018-10-02', 120), 4),
+('Emp01', 'P02', CONVERT(DATE, '2014-01-22', 120), 13),
+('Emp02', 'P02', CONVERT(DATE, '2020-06-19', 120), 15),
+('Emp02', 'P01', CONVERT(DATE, '2020-06-11', 120), 10),
+('Emp01', 'P04', CONVERT(DATE, '2009-02-08', 120), 6),
+('Emp02', 'P01', CONVERT(DATE, '2018-10-18', 120), 18),
+('Emp01', 'P05', CONVERT(DATE, '2011-09-02', 120), 7);
+
+select * from Works_On
+
+
+--a. Retrieve the name and address of all employees who work for the ‘IT’ department.
+Select e.fname,e.lname from Employee e 
+inner join Department d on e.DeptNo = d.DeptNo
+where d.DeptName = 'IT'
+
+--b. Retrieve the salary of every employee and all distinct salary values.
+Select e.fname,e.lname,e.salary 
+from Employee e
+
+select distinct salary
+from Employee
+
+Select fname,lname,salary, 'Employee Salary' As type
+from Employee
+union
+select distinct null, null, salary, 'Distinct Salary'
+from (select distinct salary from Employee) As DistinctSalaries
+
+--c. Retrieve the names of all employees in department 005 who work more than 10 hours per week on the P01 project.
+Select e.fname, e.lname
+from Employee e
+inner join Works_On w on e.EmpNo = w.EmpNo
+inner join Project p on w.ProjNo = p.ProjNo
+where e.DeptNo = 005
+	and w.hours > 10
+	and p.ProjNo = 'P01'
+
+--d. Retrieve a list of employees and the projects they are working on, ordered by department and, within each department, ordered alphabetically by last name, then first name.
+
+SELECT 
+    E.EmpNo, 
+    E.fname, 
+    E.lname, 
+    D.DeptName, 
+    P.ProjNo, 
+    P.Project_Name
+FROM Employee E
+JOIN Department D ON E.DeptNo = D.DeptNo
+JOIN Works_On W ON E.EmpNo = W.EmpNo
+JOIN Project P ON W.ProjNo = P.ProjNo
+ORDER BY D.DeptName, E.lname, E.fname;
+
+-- e. Show the resulting salaries of every employee working on the ‘IOT’ project is given a 10 percent raise.
+
+/*select e.fname,e.lname,e.salary, e.salary * 1.10 as 'Expected Salary'
+from Employee e
+inner join Project p on e.DeptNo = p.DeptNo
+where p.Project_Name = 'IOT' */
+
+UPDATE Employee 
+SET salary = salary * 1.10
+WHERE EmpNo IN (
+    SELECT W.EmpNo
+    FROM Works_On W
+    INNER JOIN Project P ON W.ProjNo = P.ProjNo
+    WHERE P.Project_Name = 'IOT'
+);
+
+select * from Employee
+
